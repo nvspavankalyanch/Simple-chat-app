@@ -1,0 +1,24 @@
+{
+  "name": "simple-chat-app-100xengineers",
+  "version": "1.0.0",
+  "description": "A basic chat application using Node.js and Socket.io. The app allows users to connect to a common chat room and exchange messages in real time, enabling seamless communication between multiple users.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nvspavankalyanch/Simple-chat-app-100xEngineers.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nvspavankalyanch/Simple-chat-app-100xEngineers/issues"
+  },
+  "homepage": "https://github.com/nvspavankalyanch/Simple-chat-app-100xEngineers#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}
