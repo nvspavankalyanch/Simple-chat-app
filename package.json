@@ -19,6 +19,7 @@
   "homepage": "https://github.com/nvspavankalyanch/Simple-chat-app-100xEngineers#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
   }
 }

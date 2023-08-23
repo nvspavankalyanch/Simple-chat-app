@@ -1,37 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Chat Application</title>
+  <title>Simple Chat App</title>
+  <style>
+    body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.chat-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+}
+
+.chat-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.chat-messages {
+  max-height: 300px;
+  overflow-y: scroll;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.chat-input {
+  margin-top: 20px;
+}
+
+#message-input {
+  width: 80%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+@media screen and (max-width: 480px) {
+  .chat-container {
+    padding: 10px;
+  }
+
+  .chat-messages {
+    max-height: 200px;
+  }
+
+  #message-input {
+    width: 70%;
+  }
+}
+  </style>
 </head>
 <body>
-  <h1> Simple Chat Application</h1>
-  <div id="messages"></div>
-  <input id="messageInput" type="text" placeholder="Type a message...">
-  <button id="sendButton">Send</button>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>Chat App</h1>
+    </div>
+    <div class="chat-messages">
+      <ul id="messages"></ul>
+    </div>
+    <div class="chat-input">
+      <form id="chat-form">
+        <input id="name-input" type="text" placeholder="Enter your name" autocomplete="off" />
+        <input id="message-input" type="text" placeholder="Type your message" autocomplete="off" />
+        <button id="send-button">Send</button>
+      </form>
+    </div>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
 
-    const messagesContainer = document.getElementById('messages');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
+    const form = document.getElementById('chat-form');
+    const nameInput = document.getElementById('name-input');
+    const messageInput = document.getElementById('message-input');
+    const messages = document.getElementById('messages');
 
-    sendButton.addEventListener('click', () => {
-      const message = messageInput.value;
-      if (message.trim() !== '') {
-        socket.emit('message', message);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (nameInput.value && messageInput.value) {
+        const message = {
+          name: nameInput.value,
+          text: messageInput.value
+        };
+        socket.emit('chat message', message);
         messageInput.value = '';
       }
     });
 
-    socket.on('message', (message) => {
-      const messageElement = document.createElement('p');
-      messageElement.textContent = message;
-      messagesContainer.appendChild(messageElement);
+    socket.on('chat message', (message) => {
+      const li = document.createElement('li');
+      li.textContent = `${message.name}: ${message.text}`;
+      messages.appendChild(li);
     });
   </script>
 </body>
 </html>
+
