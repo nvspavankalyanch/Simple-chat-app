@@ -1,118 +1,145 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Chat App</title>
   <style>
     body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-}
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
-.chat-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f2f2f2;
-  border-radius: 5px;
-}
+    .chat-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f2f2f2;
+      border-radius: 5px;
+    }
 
-.chat-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
+    .chat-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-.chat-messages {
-  max-height: 300px;
-  overflow-y: scroll;
-  padding: 10px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+    .chat-messages {
+      max-height: 300px;
+      overflow-y: scroll;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-.chat-input {
-  margin-top: 20px;
-}
+    .chat-input {
+      margin-top: 20px;
+    }
 
-#message-input {
-  width: 80%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+    #message-input {
+      width: 80%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-button {
-  padding: 5px 10px;
-  background-color: #4CAF50;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+    button {
+      padding: 5px 10px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-button:hover {
-  background-color: #45a049;
-}
+    button:hover {
+      background-color: #45a049;
+    }
 
-@media screen and (max-width: 480px) {
-  .chat-container {
-    padding: 10px;
-  }
+    @media screen and (max-width: 480px) {
+      .chat-container {
+        padding: 10px;
+      }
 
-  .chat-messages {
-    max-height: 200px;
-  }
+      .chat-messages {
+        max-height: 200px;
+      }
 
-  #message-input {
-    width: 70%;
-  }
-}
+      #message-input {
+        width: 70%;
+      }
+    }
   </style>
 </head>
+
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <h1>Chat App</h1>
-    </div>
-    <div class="chat-messages">
-      <ul id="messages"></ul>
-    </div>
-    <div class="chat-input">
-      <form id="chat-form">
-        <input id="name-input" type="text" placeholder="Enter your name" autocomplete="off" />
-        <input id="message-input" type="text" placeholder="Type your message" autocomplete="off" />
-        <button id="send-button">Send</button>
-      </form>
-    </div>
+  <div class="chat-header">
+    <h1>Chat App</h1>
+    <div id="online-users">Online Users:</div>
+  </div>
+  <div class="chat-messages">
+    <ul id="messages"></ul>
+  </div>
+  <div class="chat-input">
+    <form id="chat-form">
+      <input id="name-input" type="text" placeholder="Enter your name" autocomplete="off" required />
+      <input id="message-input" type="text" placeholder="Type your message" autocomplete="off" required />
+      <button id="send-button">Send</button>
+    </form>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+    integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+    crossorigin="anonymous"></script>
   <script>
-    const socket = io();
+    document.addEventListener('DOMContentLoaded', () => {
+      const sendButton = document.getElementById('send-button');
+      const nameInput = document.getElementById('name-input');
+      const messageInput = document.getElementById('message-input');
+      const messagesList = document.getElementById('messages');
+      const onlineUsers = document.getElementById('online-users');
 
-    const form = document.getElementById('chat-form');
-    const nameInput = document.getElementById('name-input');
-    const messageInput = document.getElementById('message-input');
-    const messages = document.getElementById('messages');
+      const socket = io();
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (nameInput.value && messageInput.value) {
-        const message = {
-          name: nameInput.value,
-          text: messageInput.value
-        };
-        socket.emit('chat message', message);
-        messageInput.value = '';
-      }
+      let username = '';
+
+      nameInput.addEventListener('change', () => {
+        username = nameInput.value;
+        socket.emit('user join', username);
+        nameInput.setAttribute('readonly', true); // Disable the input field
+      });
+      sendButton.addEventListener('click', () => {
+        const messageText = messageInput.value.trim();
+        if (messageText !== '') {
+          const message = {
+            name: username,
+            text: messageText
+          };
+          socket.emit('chat message', message);
+          messageInput.value = '';
+        }
+      });
+
+      socket.on('chat message', (message) => {
+        const messageElement = document.createElement('li');
+        messageElement.textContent = `${message.name}: ${message.text}`;
+        messagesList.appendChild(messageElement);
+      });
+
+      socket.on('online users', (users) => {
+        updateOnlineUsers(users);
+      });
+
+      socket.on('user join', (user) => {
+        onlineUsers.innerHTML = 'Online Users: ' + user;
+      });
+
+      socket.on('user leave', (user) => {
+        onlineUsers.innerHTML = 'Online Users: ' + user;
+      });
     });
 
-    socket.on('chat message', (message) => {
-      const li = document.createElement('li');
-      li.textContent = `${message.name}: ${message.text}`;
-      messages.appendChild(li);
-    });
   </script>
 </body>
+
 </html>
