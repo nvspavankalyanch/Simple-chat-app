@@ -108,6 +108,52 @@
         socket.emit('user join', username);
         nameInput.setAttribute('readonly', true); // Disable the input field
       });
+      messageInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const messageText = messageInput.value.trim();
+      if (messageText !== '') {
+        if (messageText.startsWith('/')) {
+          handleSlashCommand(messageText);
+        } else {
+          const message = {
+            name: username,
+            text: messageText
+          };
+          socket.emit('chat message', message);
+        }
+        messageInput.value = '';
+      }
+    }
+  });
+
+  // Handle slash commands
+  function handleSlashCommand(command) {
+    const parts = command.split(' ');
+    const cmd = parts[0].toLowerCase();
+    switch (cmd) {
+      case '/help':
+        appendSystemMessage('Available Commands: /help, /random, /clearchat');
+        break;
+      case '/random':
+        const randomNumber = Math.floor(Math.random() * 100);
+        appendSystemMessage(`Random Number: ${randomNumber}`);
+        break;
+      case '/clearchat':
+        messagesList.innerHTML = '';
+        break;
+      default:
+        appendSystemMessage(`Unknown Command: ${cmd}`);
+    }
+  }
+
+  // Helper function to append system messages
+  function appendSystemMessage(message) {
+    const messageElement = document.createElement('li');
+    messageElement.classList.add('system-message');
+    messageElement.textContent = message;
+    messagesList.appendChild(messageElement);
+  }
       sendButton.addEventListener('click', () => {
         const messageText = messageInput.value.trim();
         if (messageText !== '') {
